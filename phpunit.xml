@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit colors="false" stopOnFailure="false" bootstrap="bootstrap.php">
+	<testsuites>
+		<testsuite name="core">
+			<directory suffix="_Test.php">test/core</directory>
+		</testsuite>
+	</testsuites>
+
+	<php>
+		<const name="PHPUNIT" value="1"/>
+	</php>
+</phpunit>
