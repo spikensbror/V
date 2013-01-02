@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<phpunit colors="false" stopOnFailure="false" bootstrap="bootstrap.php">
+<phpunit colors="false" stopOnFailure="false" bootstrap="V.php">
 	<testsuites>
-		<testsuite name="core">
-			<directory suffix="_Test.php">test/core</directory>
+		<testsuite name="V">
+			<directory suffix="_Test.php">test/V</directory>
 		</testsuite>
 	</testsuites>
 
