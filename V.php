@@ -25,9 +25,9 @@ function v($module)
 	// Static module buffer.
 	static $modules = array();
 
-	// Trim module name from backslashes, get entry from buffer
-	// and return it if it is already buffered.
-	$module = trim($module, '\\');
+	// Trim module name from backslashes and make it lower-case,
+	// get entry from buffer and return it if it is already buffered.
+	$module = strtolower(trim($module, '\\'));
 	$entry =& $modules[$module];
 	if($entry !== null) {
 		return $entry;
