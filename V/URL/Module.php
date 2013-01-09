@@ -4,15 +4,12 @@ namespace V\URL;
 
 class Module extends \V\Core\Module
 {
-	private $_routers = null;
+	private $_router = null;
 
-	public function route($parent = 'default')
+	public function route()
 	{
-		$entry =& $this->_routers[$parent];
-		if($entry) {
-			return $entry;
-		}
-
-		return ($entry = new Router($parent));
+		return ($this->_router)
+			? $this->_router
+			: ($this->_router = new Router($this->isVolatile()));
 	}
 }

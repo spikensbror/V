@@ -6,7 +6,8 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 {
 	public function setUp()
 	{
-		$this->router = new Router('default');
+		$this->router = new Router(false);
+		$this->vRouter = new Router(true);
 	}
 
 	public function testSanitizePath()
@@ -49,5 +50,19 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 			4882,
 			call_user_func($this->router->get('DELETE', '/'))
 		);
+	}
+
+	public function testAddVolatile()
+	{
+		$this->vRouter->add('GET', '/', function() {});
+
+		$this->setExpectedException('\V\Core\Exception');
+		$this->vRouter->add('GET', '/', function() {});
+	}
+
+	public function testGetVolatile()
+	{
+		$this->setExpectedException('\V\Core\Exception');
+		$this->vRouter->get('GET', '/');
 	}
 }
