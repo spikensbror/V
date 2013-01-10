@@ -82,6 +82,16 @@ class Router extends \V\Core\BaseClass
 		return $result;
 	}
 
+	public function resolve($verb, $path)
+	{
+		$raw = $this->raw($verb, $path);
+		if(!is_array($raw)) {
+			return $raw();
+		}
+
+		return call_user_func_array($raw['f'], $raw['args']);
+	}
+
 	public function sanitizePath($path)
 	{
 		$path = strtolower($path);

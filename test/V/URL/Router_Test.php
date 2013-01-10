@@ -106,4 +106,19 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 		$this->setExpectedException('\V\Core\Exception');
 		$this->router->post('/');
 	}
+
+	/**
+	 * @depends testMagic
+	 */
+	public function testResolve()
+	{
+		$this->router->post('/', function() {
+			return 155;
+		});
+
+		$this->assertEquals(
+			155,
+			$this->router->resolve('post', '/')
+		);
+	}
 }
