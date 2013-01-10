@@ -37,11 +37,17 @@ class Router extends \V\Core\BaseClass
 
 		// Stop override if volatile.
 		$entry =& $this->_routes[$verb][$path];
-		if($entry && $this->isVolatile()) {
+		if($this->isVolatile() && $entry) {
 			throw new \V\Core\Exception(
 				__CLASS__,
 				__METHOD__,
 				"Route already exists - '$verb':'$path'"
+			);
+		} else if($this->isVolatile() && !is_callable($f)) {
+			throw new \V\Core\Exception(
+				__CLASS__,
+				__METHOD__,
+				"Route handler is not callable - '$verb':'$path'"
 			);
 		}
 

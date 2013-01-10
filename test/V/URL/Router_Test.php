@@ -88,7 +88,7 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 	public function testResolveVolatile()
 	{
 		$this->setExpectedException('\V\Core\Exception');
-		$this->vRouter->raw('GET', '/');
+		$this->vRouter->resolve('GET', '/');
 	}
 
 	/**
