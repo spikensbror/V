@@ -6,36 +6,80 @@ class Router extends \V\Core\BaseClass
 {
 	private $_routes = array();
 
-	public function add($method, $path, $f)
+	private $_types = array(
+		':string' => '([a-zA-Z]+)',
+		':int' => '([0-9]+)',
+		':alpha' => '([a-zA-Z0-9]+)',
+	);
+
+	private $_verbs = array(
+		'GET',
+		'POST',
+		'PUT',
+		'DELETE',
+	);
+
+	function __call($verb, $args)
 	{
+		if(sizeof($args) !== 2) {
+			throw new \V\Core\Exception(
+				__CLASS__,
+				__METHOD__,
+				'Expected 2 arguments, got '.sizeof($args).'.'
+			);
+		}
+
+		return $this->add($verb, $args[0], $args[1]);
+	}
+
+	public function add($verb, $path, $f)
+	{
+		$verb = $this->sanitizeVerb($verb);
 		$path = $this->sanitizePath($path);
 
-		$entry =& $this->_routes[$method][$path];
+		// Stop override if volatile.
+		$entry =& $this->_routes[$verb][$path];
 		if($entry && $this->isVolatile()) {
 			throw new \V\Core\Exception(
 				__CLASS__,
 				__METHOD__,
-				"Route already exists - '$method':'$path'"
+				"Route already exists - '$verb':'$path'"
 			);
 		}
 
 		return ($entry = $f);
 	}
 
-	public function get($method, $path)
+	public function raw($verb, $path)
 	{
+		$verb = $this->sanitizeVerb($verb);
 		$path = $this->sanitizePath($path);
 
-		$entry =& $this->_routes[$method][$path];
-		if(!$entry && $this->isVolatile()) {
+		$entry =& $this->_routes[$verb][$path];
+		if($entry) {
+			return $entry;
+		}
+
+		$result = array();
+		foreach($this->_routes[$verb] as $pattern => $f) {
+			$pattern = strtr($pattern, $this->_types);
+			if(preg_match('#^/?'.$pattern.'/?$#', $path, $matches)) {
+				unset($matches[0]);
+				$result['f'] = $f;
+				$result['args'] = $matches;
+				break;
+			}
+		}
+
+		if($this->isVolatile() && !$result['f']) {
 			throw new \V\Core\Exception(
 				__CLASS__,
 				__METHOD__,
-				"Route does not exist - '$method':'$path'"
+				"Route does not exist - '$verb':'$path'"
 			);
 		}
 
-		return ($entry) ? $entry : false;
+		return $result;
 	}
 
 	public function sanitizePath($path)
@@ -49,5 +93,24 @@ class Router extends \V\Core\BaseClass
 		}
 		
 		return $path;
+	}
+
+	public function sanitizeVerb($verb)
+	{
+		$verb = strtoupper($verb);
+		if(!in_array($verb, $this->_verbs)) {
+			if($this->isVolatile()) {
+				throw new \V\Core\Exception(
+					__CLASS__,
+					__METHOD__,
+					"Verb does not exist - '$verb'"
+				);
+			}
+
+			// Default to GET if not volatile.
+			$verb = 'GET';
+		}
+
+		return $verb;
 	}
 }

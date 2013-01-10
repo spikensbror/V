@@ -26,29 +26,49 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 		);
 	}
 
-	public function testAddAndGet()
+	public function testSanitizeVerb()
 	{
-		$this->router->add('GET', '/', function() {
+		$this->assertEquals(
+			'GET',
+			$this->router->sanitizeVerb('get')
+		);
+	}
+
+	public function testSanitizeVerbVolatile()
+	{
+		$this->setExpectedException('\V\Core\Exception');
+		$this->vRouter->sanitizeVerb('invalid');
+	}
+
+	public function testAddAndRaw()
+	{
+		// Flat.
+		$this->router->add('POST', '/', function() {
 			return 1449;
 		});
-		$this->router->add('POST', '/', function() {
-			return 1775;
-		});
-		$this->router->add('DELETE', '/', function() {
-			return 4882;
-		});
 
+		// Flat.
+		$flat = $this->router->raw('POST', '/');
+		$this->assertTrue(is_callable($flat));
 		$this->assertEquals(
 			1449,
-			call_user_func($this->router->get('GET', '/'))
+			call_user_func($flat)
 		);
+
+		// Multi.
+		$this->router->add('GET', '/:string/:int/', function($x, $y) {
+			$y = $y * 10;
+			return $x.' '.$y;
+		});
+
+		// Multi.
+		$multi = $this->router->raw('GET', '/hello/12/');
+		$this->assertTrue(is_array($multi));
+		$this->assertTrue(isset($multi['f']));
+		$this->assertTrue(isset($multi['args']));
 		$this->assertEquals(
-			1775,
-			call_user_func($this->router->get('POST', '/'))
-		);
-		$this->assertEquals(
-			4882,
-			call_user_func($this->router->get('DELETE', '/'))
+			'hello 120',
+			call_user_func_array($multi['f'], $multi['args'])
 		);
 	}
 
@@ -60,9 +80,30 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 		$this->vRouter->add('GET', '/', function() {});
 	}
 
-	public function testGetVolatile()
+	public function testRawVolatile()
 	{
 		$this->setExpectedException('\V\Core\Exception');
-		$this->vRouter->get('GET', '/');
+		$this->vRouter->raw('GET', '/');
+	}
+
+	/**
+	 * @depends testAddAndRaw
+	 */
+	public function testMagic()
+	{
+		$this->router->post('/', function() {
+			return 10;
+		});
+
+		$this->assertEquals(
+			10,
+			call_user_func($this->router->raw('POST', '/'))
+		);
+	}
+
+	public function testMagicVolatile()
+	{
+		$this->setExpectedException('\V\Core\Exception');
+		$this->router->post('/');
 	}
 }
