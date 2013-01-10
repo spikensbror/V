@@ -4,19 +4,17 @@ namespace V\URL;
 
 class Router extends \V\Core\BaseClass
 {
-	private $_routes = array();
+	private $_routes = array(
+		'GET' => array(),
+		'POST' => array(),
+		'PUT' => array(),
+		'DELETE' => array(),
+	);
 
 	private $_types = array(
 		':string' => '([a-zA-Z]+)',
 		':int' => '([0-9]+)',
 		':alpha' => '([a-zA-Z0-9]+)',
-	);
-
-	private $_verbs = array(
-		'GET',
-		'POST',
-		'PUT',
-		'DELETE',
 	);
 
 	function __call($verb, $args)
@@ -50,28 +48,25 @@ class Router extends \V\Core\BaseClass
 		return ($entry = $f);
 	}
 
-	public function raw($verb, $path)
+	public function resolve($verb, $path)
 	{
 		$verb = $this->sanitizeVerb($verb);
 		$path = $this->sanitizePath($path);
 
-		$entry =& $this->_routes[$verb][$path];
-		if($entry) {
-			return $entry;
+		if(isset($this->_routes[$verb][$path])) {
+			$f = $this->_routes[$verb][$path];
+			return $f();
 		}
 
-		$result = array();
 		foreach($this->_routes[$verb] as $pattern => $f) {
 			$pattern = strtr($pattern, $this->_types);
 			if(preg_match('#^/?'.$pattern.'/?$#', $path, $matches)) {
-				unset($matches[0]);
-				$result['f'] = $f;
-				$result['args'] = $matches;
-				break;
+				array_shift($matches);
+				return call_user_func_array($f, $matches);
 			}
 		}
 
-		if($this->isVolatile() && !$result['f']) {
+		if($this->isVolatile()) {
 			throw new \V\Core\Exception(
 				__CLASS__,
 				__METHOD__,
@@ -79,17 +74,7 @@ class Router extends \V\Core\BaseClass
 			);
 		}
 
-		return $result;
-	}
-
-	public function resolve($verb, $path)
-	{
-		$raw = $this->raw($verb, $path);
-		if(!is_array($raw)) {
-			return $raw();
-		}
-
-		return call_user_func_array($raw['f'], $raw['args']);
+		return null;
 	}
 
 	public function sanitizePath($path)
@@ -108,7 +93,7 @@ class Router extends \V\Core\BaseClass
 	public function sanitizeVerb($verb)
 	{
 		$verb = strtoupper($verb);
-		if(!in_array($verb, $this->_verbs)) {
+		if(!array_key_exists($verb, $this->_routes)) {
 			if($this->isVolatile()) {
 				throw new \V\Core\Exception(
 					__CLASS__,

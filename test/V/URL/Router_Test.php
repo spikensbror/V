@@ -26,6 +26,9 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 		);
 	}
 
+	/**
+	 * @depends testSanitizePath
+	 */
 	public function testSanitizeVerb()
 	{
 		$this->assertEquals(
@@ -34,44 +37,43 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 		);
 	}
 
+	/**
+	 * @depends testSanitizeVerb
+	 */
 	public function testSanitizeVerbVolatile()
 	{
 		$this->setExpectedException('\V\Core\Exception');
 		$this->vRouter->sanitizeVerb('invalid');
 	}
 
-	public function testAddAndRaw()
+	/**
+	 * @depends testSanitizePath
+	 */
+	public function testAddAndResolve()
 	{
-		// Flat.
 		$this->router->add('POST', '/', function() {
 			return 1449;
 		});
 
-		// Flat.
-		$flat = $this->router->raw('POST', '/');
-		$this->assertTrue(is_callable($flat));
-		$this->assertEquals(
-			1449,
-			call_user_func($flat)
-		);
-
-		// Multi.
 		$this->router->add('GET', '/:string/:int/', function($x, $y) {
 			$y = $y * 10;
 			return $x.' '.$y;
 		});
 
-		// Multi.
-		$multi = $this->router->raw('GET', '/hello/12/');
-		$this->assertTrue(is_array($multi));
-		$this->assertTrue(isset($multi['f']));
-		$this->assertTrue(isset($multi['args']));
+		$this->assertEquals(
+			1449,
+			$this->router->resolve('POST', '/')
+		);
+
 		$this->assertEquals(
 			'hello 120',
-			call_user_func_array($multi['f'], $multi['args'])
+			$this->router->resolve('GET', '/hello/12/')
 		);
 	}
 
+	/**
+	 * @depends testAddAndResolve
+	 */
 	public function testAddVolatile()
 	{
 		$this->vRouter->add('GET', '/', function() {});
@@ -80,14 +82,17 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 		$this->vRouter->add('GET', '/', function() {});
 	}
 
-	public function testRawVolatile()
+	/**
+	 * @depends testAddAndResolve
+	 */
+	public function testResolveVolatile()
 	{
 		$this->setExpectedException('\V\Core\Exception');
 		$this->vRouter->raw('GET', '/');
 	}
 
 	/**
-	 * @depends testAddAndRaw
+	 * @depends testAddAndResolve
 	 */
 	public function testMagic()
 	{
@@ -97,28 +102,16 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 
 		$this->assertEquals(
 			10,
-			call_user_func($this->router->raw('POST', '/'))
+			$this->router->resolve('POST', '/')
 		);
-	}
-
-	public function testMagicVolatile()
-	{
-		$this->setExpectedException('\V\Core\Exception');
-		$this->router->post('/');
 	}
 
 	/**
 	 * @depends testMagic
 	 */
-	public function testResolve()
+	public function testMagicVolatile()
 	{
-		$this->router->post('/', function() {
-			return 155;
-		});
-
-		$this->assertEquals(
-			155,
-			$this->router->resolve('post', '/')
-		);
+		$this->setExpectedException('\V\Core\Exception');
+		$this->router->post('/');
 	}
 }
