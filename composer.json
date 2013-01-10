@@ -6,6 +6,9 @@
 		"php": ">=5.3.0"
 	},
 	"autoload": {
-		"files": ["V.php"]
+		"files": ["V.php"],
+		"psr-0": {
+			"V": ""
+		}
 	}
 }
