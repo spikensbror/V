@@ -6,8 +6,7 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 {
 	public function setUp()
 	{
-		$this->router = new Router(false);
-		$this->vRouter = new Router(true);
+		$this->router = new Router();
 	}
 
 	public function testSanitizePath()
@@ -35,15 +34,14 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 			'GET',
 			$this->router->sanitizeVerb('get')
 		);
-	}
-
-	/**
-	 * @depends testSanitizeVerb
-	 */
-	public function testSanitizeVerbVolatile()
-	{
-		$this->setExpectedException('\V\Core\Exception');
-		$this->vRouter->sanitizeVerb('invalid');
+		$this->assertEquals(
+			'POST',
+			$this->router->sanitizeVerb('post')
+		);
+		$this->assertEquals(
+			'GET',
+			$this->router->sanitizeVerb('invalid')
+		);
 	}
 
 	/**
@@ -74,21 +72,19 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 	/**
 	 * @depends testAddAndResolve
 	 */
-	public function testAddVolatile()
+	public function testResolveRouteNotFoundException()
 	{
-		$this->vRouter->add('GET', '/', function() {});
-
-		$this->setExpectedException('\V\Core\Exception');
-		$this->vRouter->add('GET', '/', function() {});
+		$this->setExpectedException('\V\URL\Exception\RouteNotFound');
+		$this->router->resolve('GET', '/does/not/exist/');
 	}
 
 	/**
 	 * @depends testAddAndResolve
 	 */
-	public function testResolveVolatile()
+	public function testAddRouteNotCallableException()
 	{
-		$this->setExpectedException('\V\Core\Exception');
-		$this->vRouter->resolve('GET', '/');
+		$this->setExpectedException('\V\URL\Exception\RouteNotCallable');
+		$this->router->add('GET', '/', array());
 	}
 
 	/**
@@ -109,9 +105,9 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 	/**
 	 * @depends testMagic
 	 */
-	public function testMagicVolatile()
+	public function testMagicInvalidArgumentCountException()
 	{
-		$this->setExpectedException('\V\Core\Exception');
+		$this->setExpectedException('\V\Core\Exception\InvalidArgumentCount');
 		$this->router->post('/');
 	}
 }

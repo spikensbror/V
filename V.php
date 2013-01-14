@@ -11,11 +11,6 @@
 //                                                                           \\
 // ------------------------------------------------------------------------- \\
 
-// If volatile isn't specified, set it as default to false.
-if(!defined('V_VOLATILE')) {
-	define('V_VOLATILE', false);
-}
-
 // Require autoload.
 require_once 'vendor/autoload.php';
 
@@ -37,17 +32,15 @@ function v($module)
 	// is defined as volatile, otherwise just set buffer to false and return.
 	$class = "V\\$module\\Module";
 	if(!class_exists($class)) {
-		if(V_VOLATILE) {
-			throw new \V\Core\Exception(
-				'Global',
-				__FUNCTION__,
-				"Module requested does not exist - '$module':'$class'"
-			);
-		}
+		throw new \V\Core\Exception\ModuleNotFound(
+			'Global',
+			__FUNCTION__,
+			$module
+		);
 
 		return ($entry = false);
 	}
 
 	// Instantiate module.
-	return ($entry = new $class(V_VOLATILE));
+	return ($entry = new $class());
 }

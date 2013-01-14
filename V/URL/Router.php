@@ -1,8 +1,10 @@
 <?php
 
 namespace V\URL;
+use \V\Core\Exception as CoreException;
+use \V\URL\Exception as URLException;
 
-class Router extends \V\Core\BaseClass
+class Router
 {
 	private $_routes = array(
 		'GET' => array(),
@@ -20,10 +22,11 @@ class Router extends \V\Core\BaseClass
 	function __call($verb, $args)
 	{
 		if(sizeof($args) !== 2) {
-			throw new \V\Core\Exception(
+			throw new CoreException\InvalidArgumentCount(
 				__CLASS__,
 				__METHOD__,
-				'Expected 2 arguments, got '.sizeof($args).'.'
+				2,
+				sizeof($args)
 			);
 		}
 
@@ -37,17 +40,12 @@ class Router extends \V\Core\BaseClass
 
 		// Stop override if volatile.
 		$entry =& $this->_routes[$verb][$path];
-		if($this->isVolatile() && $entry) {
-			throw new \V\Core\Exception(
+		if(!is_callable($f)) {
+			throw new URLException\RouteNotCallable(
 				__CLASS__,
 				__METHOD__,
-				"Route already exists - '$verb':'$path'"
-			);
-		} else if($this->isVolatile() && !is_callable($f)) {
-			throw new \V\Core\Exception(
-				__CLASS__,
-				__METHOD__,
-				"Route handler is not callable - '$verb':'$path'"
+				$verb,
+				$path
 			);
 		}
 
@@ -60,27 +58,25 @@ class Router extends \V\Core\BaseClass
 		$path = $this->sanitizePath($path);
 
 		if(isset($this->_routes[$verb][$path])) {
-			$f = $this->_routes[$verb][$path];
+			$f =& $this->_routes[$verb][$path];
 			return $f();
 		}
 
 		foreach($this->_routes[$verb] as $pattern => $f) {
 			$pattern = strtr($pattern, $this->_types);
+			
 			if(preg_match('#^/?'.$pattern.'/?$#', $path, $matches)) {
 				array_shift($matches);
 				return call_user_func_array($f, $matches);
 			}
 		}
 
-		if($this->isVolatile()) {
-			throw new \V\Core\Exception(
-				__CLASS__,
-				__METHOD__,
-				"Route does not exist - '$verb':'$path'"
-			);
-		}
-
-		return null;
+		throw new URLException\RouteNotFound(
+			__CLASS__,
+			__METHOD__,
+			$verb,
+			$path
+		);
 	}
 
 	public function sanitizePath($path)
@@ -99,16 +95,9 @@ class Router extends \V\Core\BaseClass
 	public function sanitizeVerb($verb)
 	{
 		$verb = strtoupper($verb);
+		
+		// Default to GET if not volatile.
 		if(!array_key_exists($verb, $this->_routes)) {
-			if($this->isVolatile()) {
-				throw new \V\Core\Exception(
-					__CLASS__,
-					__METHOD__,
-					"Verb does not exist - '$verb'"
-				);
-			}
-
-			// Default to GET if not volatile.
 			$verb = 'GET';
 		}
 

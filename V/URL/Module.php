@@ -10,6 +10,6 @@ class Module extends \V\Core\Module
 	{
 		return ($this->_router)
 			? $this->_router
-			: ($this->_router = new Router($this->isVolatile()));
+			: ($this->_router = new Router());
 	}
 }

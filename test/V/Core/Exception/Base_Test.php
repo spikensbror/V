@@ -1,12 +1,14 @@
 <?php
 
-namespace V\Core;
+namespace V\Core\Exception;
 
-class Exception_Test extends \PHPUnit_Framework_TestCase
+class Exception_Mock extends Base {}
+
+class Base_Test extends \PHPUnit_Framework_TestCase
 {
 	public function setUp()
 	{
-		$this->e = new Exception(
+		$this->e = new Exception_Mock(
 			'Test',
 			'someMethod',
 			'Some exception occured!'

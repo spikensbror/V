@@ -1,8 +1,8 @@
 <?php
 
-namespace V\Core;
+namespace V\Core\Exception;
 
-class Exception extends \Exception
+abstract class Base extends \Exception
 {
 	private $_class = '';
 	private $_method = '';
