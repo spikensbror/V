@@ -37,8 +37,6 @@ function v($module)
 			__FUNCTION__,
 			$module
 		);
-
-		return ($entry = false);
 	}
 
 	// Instantiate module.
