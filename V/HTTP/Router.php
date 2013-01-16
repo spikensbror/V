@@ -2,7 +2,6 @@
 
 namespace V\HTTP;
 use \V\Core\Exception as CoreException;
-use \V\HTTP\Exception as URLException;
 
 class Router
 {
@@ -41,7 +40,7 @@ class Router
 		// Stop override if volatile.
 		$entry =& $this->_routes[$verb][$path];
 		if(!is_callable($f)) {
-			throw new URLException\RouteNotCallable(
+			throw new Exception\RouteNotCallable(
 				__CLASS__,
 				__METHOD__,
 				$verb,
@@ -71,7 +70,7 @@ class Router
 			}
 		}
 
-		throw new URLException\RouteNotFound(
+		throw new Exception\RouteNotFound(
 			__CLASS__,
 			__METHOD__,
 			$verb,
