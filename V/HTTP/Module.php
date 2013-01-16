@@ -1,6 +1,6 @@
 <?php
 
-namespace V\URL;
+namespace V\HTTP;
 
 class Module extends \V\Core\Module
 {

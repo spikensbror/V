@@ -1,6 +1,6 @@
 <?php
 
-namespace V\URL;
+namespace V\HTTP;
 
 class Router_Test extends \PHPUnit_Framework_TestCase
 {
@@ -74,7 +74,7 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 	 */
 	public function testResolveRouteNotFoundException()
 	{
-		$this->setExpectedException('\V\URL\Exception\RouteNotFound');
+		$this->setExpectedException('\V\HTTP\Exception\RouteNotFound');
 		$this->router->resolve('GET', '/does/not/exist/');
 	}
 
@@ -83,7 +83,7 @@ class Router_Test extends \PHPUnit_Framework_TestCase
 	 */
 	public function testAddRouteNotCallableException()
 	{
-		$this->setExpectedException('\V\URL\Exception\RouteNotCallable');
+		$this->setExpectedException('\V\HTTP\Exception\RouteNotCallable');
 		$this->router->add('GET', '/', array());
 	}
 

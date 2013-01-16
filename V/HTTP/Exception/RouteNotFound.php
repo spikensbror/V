@@ -1,6 +1,6 @@
 <?php
 
-namespace V\URL\Exception;
+namespace V\HTTP\Exception;
 
 class RouteNotFound extends \V\Core\Exception\Base
 {

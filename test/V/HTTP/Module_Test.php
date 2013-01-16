@@ -1,6 +1,6 @@
 <?php
 
-namespace V\URL;
+namespace V\HTTP;
 
 class Module_Test extends \PHPUnit_Framework_TestCase
 {
@@ -11,6 +11,6 @@ class Module_Test extends \PHPUnit_Framework_TestCase
 
 	public function testProviders()
 	{
-		$this->assertInstanceOf('V\\URL\\Router', $this->module->route());
+		$this->assertInstanceOf('V\\HTTP\\Router', $this->module->route());
 	}
 }

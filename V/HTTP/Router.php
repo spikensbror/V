@@ -1,8 +1,8 @@
 <?php
 
-namespace V\URL;
+namespace V\HTTP;
 use \V\Core\Exception as CoreException;
-use \V\URL\Exception as URLException;
+use \V\HTTP\Exception as URLException;
 
 class Router
 {
